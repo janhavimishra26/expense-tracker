@@ -1,9 +1,13 @@
+
 import { useState } from "react";
 import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+
+    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -25,6 +29,8 @@ function Login() {
             alert(res.data.message);
 
             localStorage.setItem("token", res.data.token);
+
+            navigate("/dashboard");
 
         } catch (error) {
             console.log(error.response?.data || error.message);
@@ -117,6 +123,16 @@ function Login() {
                     >
                         Login
                     </button>
+
+                    <p
+                        style={{
+                            textAlign: "center",
+                            marginTop: "15px"
+                        }}
+                    >
+                        Don't have an account?{" "}
+                        <Link to="/register">Register</Link>
+                    </p>
                 </form>
             </div>
         </div>
@@ -124,3 +140,4 @@ function Login() {
 }
 
 export default Login;
+
