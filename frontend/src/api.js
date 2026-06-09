@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-    baseURL: "http://localhost:5000",
+    baseURL: "https://expense-tracker-production-51a8.up.railway.app",
 });
 
 // FORCE token attach (no interceptor confusion)
