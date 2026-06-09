@@ -5,11 +5,9 @@ const cors = require("cors");
 const db = require('./db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const port = 5000;
+const port = process.env.PORT || 5000;
 
-app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"]
-}));
+app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
