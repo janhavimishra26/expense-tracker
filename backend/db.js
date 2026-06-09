@@ -18,11 +18,11 @@ const db = mysql.createPool({
 // Verify the connection pool works on startup
 db.getConnection((err, connection) => {
     if (err) {
-        console.error("❌ SQL Connection failed permanently:", err.message);
+        console.error("DB ERROR FULL:", err);
     } else {
-        console.log("⚡ Success! Node.js is connected to SQL Pool safely.");
-        connection.release(); // Always release the test connection back to the pool
+        console.log("DB CONNECTED SUCCESSFULLY");
+        connection.release();
     }
 });
-
+   
 module.exports = db;
