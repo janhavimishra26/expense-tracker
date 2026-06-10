@@ -36,7 +36,7 @@ function Login() {
         console.log("LOGIN ERROR:", error.response?.data || error.message);
         alert(error.response?.data || "Login failed!");
     }
-
+    }
     return (
         <div
             style={{

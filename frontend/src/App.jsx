@@ -7,7 +7,7 @@ import Income from "./Income";
 import Expenses from "./Expenses";
 
 function App() {
-  const token = localStorage.getItem("token");
+  const isAuth = () => localStorage.getItem("token");
 
   return (
     <BrowserRouter>
@@ -20,22 +20,22 @@ function App() {
         {/* PROTECTED ROUTES */}
         <Route
           path="/dashboard"
-          element={token ? <Dashboard /> : <Navigate to="/" />}
+          element={isAuth() ? <Dashboard /> : <Navigate to="/" />}
         />
 
         <Route
           path="/income"
-          element={token ? <Income /> : <Navigate to="/" />}
+          element={isAuth() ? <Income /> : <Navigate to="/" />}
         />
 
         <Route
           path="/expenses"
-          element={token ? <Expenses /> : <Navigate to="/" />}
+          element={isAuth() ? <Expenses /> : <Navigate to="/" />}
         />
 
         <Route
           path="/add-expense"
-          element={token ? <ExpenseForm /> : <Navigate to="/" />}
+          element={isAuth() ? <ExpenseForm /> : <Navigate to="/" />}
         />
 
       </Routes>
