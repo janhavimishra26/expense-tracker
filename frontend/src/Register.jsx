@@ -1,11 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function Register() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-
+    const navigate = useNavigate();
     const handleRegister = async () => {
         if (!name || !email || !password) {
             alert("Please fill all fields");
@@ -24,9 +25,13 @@ function Register() {
 
             alert("Registration successful!");
 
-            setName("");
-            setEmail("");
-            setPassword("");
+localStorage.setItem("token", res.data.token);
+
+navigate("/dashboard");
+
+setName("");
+setEmail("");
+setPassword("");
         } catch (error) {
             console.log(error.response?.data || error.message);
             alert("Registration failed!");
