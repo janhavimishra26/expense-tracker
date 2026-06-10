@@ -32,11 +32,10 @@ function Login() {
 
             navigate("/dashboard");
 
-        } catch (error) {
-            console.log(error.response?.data || error.message);
-            alert("Login failed!");
-        }
-    };
+    }catch (error) {
+        console.log("LOGIN ERROR:", error.response?.data || error.message);
+        alert(error.response?.data || "Login failed!");
+    }
 
     return (
         <div
