@@ -76,7 +76,6 @@ app.post('/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // STEP 1: CHECK EMAIL FIRST
         const checkUser = "SELECT * FROM users WHERE email = ?";
 
         db.query(checkUser, [email], (err, result) => {
@@ -88,7 +87,6 @@ app.post('/register', async (req, res) => {
                 return res.status(409).json({ message: "Email already exists" });
             }
 
-            // STEP 2: INSERT USER (ONLY IF NOT EXISTS)
             const sqlInsert =
                 "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
 
@@ -97,14 +95,22 @@ app.post('/register', async (req, res) => {
                     return res.status(500).json({ message: "Insert error" });
                 }
 
-                res.status(201).json({
-                    message: "User registered successfully"
+                // ✅ CREATE TOKEN AFTER REGISTER
+                const token = jwt.sign(
+                    { id: result.insertId, email },
+                    process.env.JWT_SECRET,
+                    { expiresIn: "1h" }
+                );
+
+                return res.status(201).json({
+                    message: "User registered successfully",
+                    token
                 });
             });
         });
 
     } catch (err) {
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
     }
 });
 app.post('/login', async (req, res) => {
