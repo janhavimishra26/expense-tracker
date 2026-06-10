@@ -73,7 +73,16 @@ app.post('/register', async (req, res) => {
                 console.error("Database Insert Error:", err);
                 return res.status(500).send("Database error during registration");
             }
-            res.status(201).send("User Registered with safe password!");
+            const token = jwt.sign(
+    { email: email },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+);
+
+res.status(201).json({
+    message: "User Registered",
+    token
+});
         });
     } catch (err) {
         console.error("Catch Block Error:", err);
