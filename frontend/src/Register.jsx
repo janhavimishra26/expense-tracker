@@ -8,10 +8,15 @@ function Register() {
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
     const handleRegister = async () => {
-        if (!name || !email || !password) {
-            alert("Please fill all fields");
-            return;
-        }
+       if (!name || !email || !password) {
+    alert("Please fill all fields");
+    return;
+}
+
+if (!/\S+@\S+\.\S+/.test(email)) {
+    alert("Please enter a valid email");
+    return;
+}
 
         try {
             const res = await axios.post(
@@ -34,7 +39,7 @@ setEmail("");
 setPassword("");
         } catch (error) {
             console.log(error.response?.data || error.message);
-            alert("Registration failed!");
+            alert(error.response?.data?.message || "Something went wrong");
         }
     };
 

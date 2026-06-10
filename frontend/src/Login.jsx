@@ -16,6 +16,10 @@ function Login() {
             alert("Please fill all fields");
             return;
         }
+        if (!/\S+@\S+\.\S+/.test(email)) {
+    alert("Invalid email format");
+    return;
+}
 
         try {
             const res = await axios.post(
@@ -29,12 +33,12 @@ function Login() {
             alert(res.data.message);
 
             localStorage.setItem("token", res.data.token);
-
             navigate("/dashboard");
+            window.dispatchEvent(new Event("storage"));
 
     }catch (error) {
         console.log("LOGIN ERROR:", error.response?.data || error.message);
-        alert(error.response?.data || "Login failed!");
+        alert(error.response?.data?.message || "Something went wrong");
     }
     }
     return (
