@@ -19,12 +19,12 @@ function Login() {
 
         try {
             const res = await axios.post(
-                "http://localhost:5000/login",
-                {
-                    email,
-                    password
-                }
-            );
+    "https://expense-tracker-production-51a8.up.railway.app/login",
+    {
+        email,
+        password
+    }
+);
 
             alert(res.data.message);
 

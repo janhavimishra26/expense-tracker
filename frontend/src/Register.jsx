@@ -14,13 +14,13 @@ function Register() {
 
         try {
             const res = await axios.post(
-                "http://localhost:5000/register",
-                {
-                    name,
-                    email,
-                    password
-                }
-            );
+    "https://expense-tracker-production-51a8.up.railway.app/register",
+    {
+        name,
+        email,
+        password
+    }
+);
 
             alert("Registration successful!");
 
