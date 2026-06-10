@@ -27,7 +27,13 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({
+    origin: [
+        "http://localhost:5173",
+        "https://your-vercel-link.vercel.app"
+    ],
+    credentials: true
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -62,34 +68,44 @@ const authenticateToken = (req, res, next) => {
 app.post('/register', async (req, res) => {
     try {
         const { name, email, password } = req.body;
-         if (!name || !email || !password) { 
-            return res.status(400).send("Name, email and password are required!");
-        }
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const sqlInsert = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
-        
-        db.query(sqlInsert, [name, email, hashedPassword], (err, result) => {
-            if (err) {
-                console.error("Database Insert Error:", err);
-                return res.status(500).send("Database error during registration");
-            }
-            const token = jwt.sign(
-    { email: email },
-    process.env.JWT_SECRET,
-    { expiresIn: "1h" }
-);
 
-res.status(201).json({
-    message: "User Registered",
-    token
-});
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // STEP 1: CHECK EMAIL FIRST
+        const checkUser = "SELECT * FROM users WHERE email = ?";
+
+        db.query(checkUser, [email], (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: "Database error" });
+            }
+
+            if (result.length > 0) {
+                return res.status(409).json({ message: "Email already exists" });
+            }
+
+            // STEP 2: INSERT USER (ONLY IF NOT EXISTS)
+            const sqlInsert =
+                "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
+
+            db.query(sqlInsert, [name, email, hashedPassword], (err, result) => {
+                if (err) {
+                    return res.status(500).json({ message: "Insert error" });
+                }
+
+                res.status(201).json({
+                    message: "User registered successfully"
+                });
+            });
         });
+
     } catch (err) {
-        console.error("Catch Block Error:", err);
-        res.status(500).send("Error registering user");
+        res.status(500).json({ message: "Server error" });
     }
 });
-
 app.post('/login', async (req, res) => {
     console.log("Request Body:", req.body);
     const { email, password } = req.body;
@@ -105,13 +121,13 @@ app.post('/login', async (req, res) => {
         });
     })
     .then(async (result) => {
-        if (!result || result.length === 0) {
-            return res.status(404).send("User not found!");
-        }
+       if (!result || result.length === 0) {
+    return res.status(404).json({ message: "Email not registered" });
+}
 
         const user = result[0];
-        const dbPassword = user.password || user.password_hash || user.Password;
-
+        const dbPassword = user.password;
+        
         if (!dbPassword) {
             console.log("❌ Error: Could not find password column in your table.");
             return res.status(500).send("Server database configuration mismatch. Check terminal logs.");
@@ -119,7 +135,7 @@ app.post('/login', async (req, res) => {
 
         const isMatch = await bcrypt.compare(password, dbPassword);
         if (!isMatch) {
-            return res.status(401).send("Invalid password. Try Again!");
+            return res.status(401).json({ message: "Incorrect password" });
         }
 
         const token = jwt.sign(
