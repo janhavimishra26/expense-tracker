@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+
 import Register from "./Register";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
@@ -7,7 +9,18 @@ import Income from "./Income";
 import Expenses from "./Expenses";
 
 function App() {
-  const isAuth = () => localStorage.getItem("token");
+  const [token, setToken] = useState(localStorage.getItem("token"));
+
+  useEffect(() => {
+    const syncAuth = () => {
+      setToken(localStorage.getItem("token"));
+    };
+
+    window.addEventListener("storage", syncAuth);
+    syncAuth();
+
+    return () => window.removeEventListener("storage", syncAuth);
+  }, []);
 
   return (
     <BrowserRouter>
@@ -20,22 +33,22 @@ function App() {
         {/* PROTECTED ROUTES */}
         <Route
           path="/dashboard"
-          element={isAuth() ? <Dashboard /> : <Navigate to="/" />}
+          element={token ? <Dashboard /> : <Navigate to="/" />}
         />
 
         <Route
           path="/income"
-          element={isAuth() ? <Income /> : <Navigate to="/" />}
+          element={token ? <Income /> : <Navigate to="/" />}
         />
 
         <Route
           path="/expenses"
-          element={isAuth() ? <Expenses /> : <Navigate to="/" />}
+          element={token ? <Expenses /> : <Navigate to="/" />}
         />
 
         <Route
           path="/add-expense"
-          element={isAuth() ? <ExpenseForm /> : <Navigate to="/" />}
+          element={token ? <ExpenseForm /> : <Navigate to="/" />}
         />
 
       </Routes>
