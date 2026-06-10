@@ -30,8 +30,9 @@ const port = process.env.PORT || 5000;
 app.use(cors({
     origin: [
         "http://localhost:5173",
-        "https://your-vercel-link.vercel.app"
+        "https://expense-tracker-5480i614g-janhavim674-7868s-projects.vercel.app"
     ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));
 
