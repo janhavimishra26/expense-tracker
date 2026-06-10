@@ -31,8 +31,8 @@ if (!/\S+@\S+\.\S+/.test(email)) {
             alert("Registration successful!");
 
 localStorage.setItem("token", res.data.token);
-
 navigate("/dashboard");
+window.dispatchEvent(new Event("storage"));
 
 setName("");
 setEmail("");

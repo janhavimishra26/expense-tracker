@@ -38,11 +38,16 @@ function Login() {
 
             alert(res.data.message);
 
-            localStorage.setItem("token", res.data.token);
-            window.dispatchEvent(new Event("storage"));
+// ✅ ADD THIS SAFETY CHECK
+if (!res.data.token) {
+    alert("Login failed: token missing");
+    return;
+}
 
-            navigate("/dashboard");
+localStorage.setItem("token", res.data.token);
+window.dispatchEvent(new Event("storage"));
 
+navigate("/dashboard");
         } catch (error) {
             console.log("LOGIN ERROR:", error.response?.data || error.message);
             alert(error.response?.data?.message || "Login failed");
