@@ -3,6 +3,26 @@ const app = express();
 
 const cors = require("cors");
 const db = require('./db');
+db.query(`
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    email VARCHAR(255) UNIQUE,
+    password VARCHAR(255)
+)
+`);
+
+db.query(`
+CREATE TABLE IF NOT EXISTS expense (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    category_id INT,
+    type VARCHAR(50),
+    description VARCHAR(255),
+    amount DECIMAL(10,2),
+    expense_date DATE
+)
+`);
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
