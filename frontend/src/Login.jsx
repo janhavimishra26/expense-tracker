@@ -9,6 +9,15 @@ function Login() {
 
     const navigate = useNavigate();
 
+     const loginRequest = () => {
+        return axios.post(
+            "https://expense-tracker-production-51a8.up.railway.app/login",
+            { email, password },
+            { timeout: 15000 }
+        );
+    };
+
+
     const handleLogin = async (e) => {
         e.preventDefault();
 
@@ -16,31 +25,29 @@ function Login() {
             alert("Please fill all fields");
             return;
         }
-        if (!/\S+@\S+\.\S+/.test(email)) {
-    alert("Invalid email format");
-    return;
-}
 
         try {
-            const res = await axios.post(
-    "https://expense-tracker-production-51a8.up.railway.app/login",
-    {
-        email,
-        password
-    }
-);
+            let res;
+
+            try {
+                res = await loginRequest();
+            } catch (err) {
+                console.log("Retrying login...");
+                res = await loginRequest();
+            }
 
             alert(res.data.message);
 
             localStorage.setItem("token", res.data.token);
-            navigate("/dashboard");
             window.dispatchEvent(new Event("storage"));
 
-    }catch (error) {
-        console.log("LOGIN ERROR:", error.response?.data || error.message);
-        alert(error.response?.data?.message || "Something went wrong");
-    }
-    }
+            navigate("/dashboard");
+
+        } catch (error) {
+            console.log("LOGIN ERROR:", error.response?.data || error.message);
+            alert(error.response?.data?.message || "Login failed");
+        }
+    };
     return (
         <div
             style={{
