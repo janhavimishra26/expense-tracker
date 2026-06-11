@@ -3,26 +3,12 @@ const app = express();
 
 const cors = require("cors");
 
-const allowedOrigins = [
-    "https://expense-tracker-qsgu7jgtj-janhavim674-7868s-projects.vercel.app",
-    "https://expense-tracker-4d18il2be-janhavim674-7868s-projects.vercel.app",
-    "https://expense-tracker-cssndm8xs-janhavim674-7868s-projects.vercel.app",
-    "http://localhost:5173"
-];
 
-app.use(cors({
-    origin: function(origin, callback) {
+const corsOptions = {
+    origin: true,
 
-        if (!origin) {
-            return callback(null, true);
-        }
+    credentials: true,
 
-        if (allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        }
-
-        return callback(null, false);
-    },
     methods: [
         "GET",
         "POST",
@@ -30,15 +16,16 @@ app.use(cors({
         "DELETE",
         "OPTIONS"
     ],
+
     allowedHeaders: [
         "Content-Type",
         "Authorization"
-    ],
-    credentials: true
-}));
+    ]
+};
 
-// IMPORTANT FOR PREFLIGHT
-app.options(/.*/, cors());
+
+app.use(cors(corsOptions));
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -55,6 +42,7 @@ CREATE TABLE IF NOT EXISTS users (
 )
 `);
 
+
 db.query(`
 CREATE TABLE IF NOT EXISTS expense (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -67,10 +55,11 @@ CREATE TABLE IF NOT EXISTS expense (
 )
 `);
 
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const port = process.env.PORT || 5000;
 
+const port = process.env.PORT || 5000;
 
 // 🛡️ JWT VERIFICATION MIDDLEWARE (Moved up so every route can see it)
 const authenticateToken = (req, res, next) => {
