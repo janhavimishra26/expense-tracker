@@ -9,50 +9,28 @@ function Login() {
 
     const navigate = useNavigate();
 
-     const loginRequest = () => {
-        return axios.post(
+const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+        const res = await axios.post(
             "https://expense-tracker-production-51a8.up.railway.app/login",
-            { email, password },
-            { timeout: 15000 }
+            { email, password }
         );
-    };
 
-
-    const handleLogin = async (e) => {
-        e.preventDefault();
-
-        if (!email || !password) {
-            alert("Please fill all fields");
-            return;
-        }
-
-        try {
-            let res;
-
-            try {
-                res = await loginRequest();
-            } catch (err) {
-                console.log("Retrying login...");
-                res = await loginRequest();
-            }
-
-            alert(res.data.message);
-
-// ✅ ADD THIS SAFETY CHECK
-if (!res.data.token) {
-    alert("Login failed: token missing");
+       if (!res.data.token) {
+    alert("Login failed");
     return;
 }
+    localStorage.setItem("token", res.data.token);
+    window.dispatchEvent(new Event("storage"));
+    navigate("/dashboard");
 
-localStorage.setItem("token", res.data.token);
-window.dispatchEvent(new Event("storage"));
-
-navigate("/dashboard");
-        } catch (error) {
-            console.log("LOGIN ERROR:", error.response?.data || error.message);
-            alert(error.response?.data?.message || "Login failed");
-        }
-    };
+    } catch (error) {
+        alert(error.response?.data?.message || "Login failed");
+    }
+};
+    
     return (
         <div
             style={{
