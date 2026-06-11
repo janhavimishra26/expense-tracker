@@ -27,8 +27,15 @@ const handleLogin = async (e) => {
     navigate("/dashboard");
 
     } catch (error) {
-        alert(error.response?.data?.message || "Login failed");
-    }
+    console.log("FULL ERROR:", error);
+    console.log("SERVER RESPONSE:", error.response);
+
+    alert(
+        error.response 
+        ? JSON.stringify(error.response.data)
+        : error.message
+    );
+}
 };
     
     return (
