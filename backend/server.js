@@ -2,7 +2,32 @@ const express = require('express');
 const app = express();
 
 const cors = require("cors");
+
+app.use(cors({
+    origin: function(origin, callback){
+
+        const allowedOrigins = [
+            "https://expense-tracker-4d18il2be-janhavim674-7868s-projects.vercel.app",
+            "https://expense-tracker-cssndm8xs-janhavim674-7868s-projects.vercel.app",
+            "http://localhost:5173"
+        ];
+
+        if(!origin || allowedOrigins.includes(origin)){
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+}));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
 const db = require('./db');
+
 db.query(`
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -23,20 +48,11 @@ CREATE TABLE IF NOT EXISTS expense (
     expense_date DATE
 )
 `);
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
-
-app.use(cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-}));
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-// =================================================================
 // 🛡️ JWT VERIFICATION MIDDLEWARE (Moved up so every route can see it)
-// =================================================================
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
