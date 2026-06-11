@@ -28,12 +28,8 @@ const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 
 app.use(cors({
-    origin: [
-        "http://localhost:5173",
-        "https://expense-tracker-5480i614g-janhavim674-7868s-projects.vercel.app"
-    ],
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
 }));
 
 app.use(express.json());
@@ -71,95 +67,75 @@ app.post('/register', async (req, res) => {
         const { name, email, password } = req.body;
 
         if (!name || !email || !password) {
-            return res.status(400).json({ message: "All fields are required" });
+            return res.status(400).json({ message: "All fields required" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const checkUser = "SELECT * FROM users WHERE email = ?";
-
-        db.query(checkUser, [email], (err, result) => {
-            if (err) {
-                return res.status(500).json({ message: "Database error" });
-            }
+        db.query("SELECT * FROM users WHERE email = ?", [email], (err, result) => {
+            if (err) return res.status(500).json({ message: "DB error" });
 
             if (result.length > 0) {
                 return res.status(409).json({ message: "Email already exists" });
             }
 
-            const sqlInsert =
-                "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
+            db.query(
+                "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
+                [name, email, hashedPassword],
+                (err, result) => {
+                    if (err) return res.status(500).json({ message: "Insert error" });
 
-            db.query(sqlInsert, [name, email, hashedPassword], (err, result) => {
-                if (err) {
-                    return res.status(500).json({ message: "Insert error" });
+                    const token = jwt.sign(
+                        { id: result.insertId, email },
+                        process.env.JWT_SECRET,
+                        { expiresIn: "1h" }
+                    );
+
+                    return res.status(201).json({
+                        message: "User registered successfully",
+                        token
+                    });
                 }
-
-                // ✅ CREATE TOKEN AFTER REGISTER
-                const token = jwt.sign(
-                    { id: result.insertId, email },
-                    process.env.JWT_SECRET,
-                    { expiresIn: "1h" }
-                );
-
-                return res.status(201).json({
-                    message: "User registered successfully",
-                    token
-                });
-            });
+            );
         });
 
     } catch (err) {
         return res.status(500).json({ message: "Server error" });
     }
 });
-app.post('/login', async (req, res) => {
-    console.log("Request Body:", req.body);
+app.post('/login', (req, res) => {
     const { email, password } = req.body;
-    if (!email || !password) { 
-        return res.status(400).send("Email and password are required!");
+
+    if (!email || !password) {
+        return res.status(400).json({ message: "Email and password required" });
     }
-    const sqlSearch = "SELECT * FROM users WHERE email = ?";
 
-    new Promise((resolve, reject) => {
-        db.query(sqlSearch, [email], (err, result) => {
-            if (err) return reject(err);
-            resolve(result);
-        });
-    })
-    .then(async (result) => {
-       if (!result || result.length === 0) {
-    return res.status(404).json({ message: "Email not registered" });
-}
+    db.query("SELECT * FROM users WHERE email = ?", [email], async (err, result) => {
+        if (err) return res.status(500).json({ message: "DB error" });
 
-        const user = result[0];
-        const dbPassword = user.password;
-        
-        if (!dbPassword) {
-            console.log("❌ Error: Could not find password column in your table.");
-            return res.status(500).send("Server database configuration mismatch. Check terminal logs.");
+        if (result.length === 0) {
+            return res.status(404).json({ message: "User not found" });
         }
 
-        const isMatch = await bcrypt.compare(password, dbPassword);
-        if (!isMatch) {
+        const user = result[0];
+
+        const match = await bcrypt.compare(password, user.password);
+
+        if (!match) {
             return res.status(401).json({ message: "Incorrect password" });
         }
 
         const token = jwt.sign(
-            { id: user.id || user.user_id, name: user.name, email: user.email },
+            { id: user.id, email: user.email },
             process.env.JWT_SECRET,
-            { expiresIn: '1h' }
+            { expiresIn: "1h" }
         );
 
         return res.status(200).json({
-            message: "Login successful!",
-            token: token,
-            user: { id: user.id || user.user_id, name: user.name, email: user.email }
+            message: "Login successful",
+            token,
+            user: { id: user.id, email: user.email }
         });
-    })
-    .catch((error) => {
-        console.error("Login processing failure:", error);
-        return res.status(500).send("Internal server processing error.");
     });
 });
 
