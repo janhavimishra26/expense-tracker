@@ -3,24 +3,43 @@ const app = express();
 
 const cors = require("cors");
 
+const allowedOrigins = [
+    "https://expense-tracker-qsgu7jgtj-janhavim674-7868s-projects.vercel.app",
+    "https://expense-tracker-4d18il2be-janhavim674-7868s-projects.vercel.app",
+    "https://expense-tracker-cssndm8xs-janhavim674-7868s-projects.vercel.app",
+    "http://localhost:5173"
+];
+
 app.use(cors({
-    origin: function(origin, callback){
+    origin: function(origin, callback) {
 
-        const allowedOrigins = [
-            "https://expense-tracker-4d18il2be-janhavim674-7868s-projects.vercel.app",
-            "https://expense-tracker-cssndm8xs-janhavim674-7868s-projects.vercel.app",
-            "http://localhost:5173"
-        ];
-
-        if(!origin || allowedOrigins.includes(origin)){
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
+        // allow requests like Postman/server
+        if (!origin) {
+            return callback(null, true);
         }
+
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        return callback(null, false);
     },
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "OPTIONS"
+    ],
+    allowedHeaders: [
+        "Content-Type",
+        "Authorization"
+    ],
     credentials: true
 }));
+
+// handle browser preflight request
+app.options("*", cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -52,6 +71,8 @@ CREATE TABLE IF NOT EXISTS expense (
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
+
+
 // 🛡️ JWT VERIFICATION MIDDLEWARE (Moved up so every route can see it)
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
