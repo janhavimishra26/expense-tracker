@@ -13,7 +13,6 @@ const allowedOrigins = [
 app.use(cors({
     origin: function(origin, callback) {
 
-        // allow requests like Postman/server
         if (!origin) {
             return callback(null, true);
         }
@@ -38,8 +37,8 @@ app.use(cors({
     credentials: true
 }));
 
-// handle browser preflight request
-app.options("*", cors());
+// IMPORTANT FOR PREFLIGHT
+app.options(/.*/, cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
