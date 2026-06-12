@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "./api";
 
 function Register() {
     const [name, setName] = useState("");
@@ -19,14 +19,15 @@ if (!/\S+@\S+\.\S+/.test(email)) {
 }
 
         try {
-            const res = await axios.post(
-    "https://expense-tracker-production-51a8.up.railway.app/register",
+            const res = await API.post(
+    "/register",
     {
         name,
         email,
         password
     }
 );
+
 
             alert("Registration successful!");
 
