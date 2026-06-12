@@ -3,12 +3,9 @@ const app = express();
 
 const cors = require("cors");
 
-
-const corsOptions = {
+app.use(cors({
     origin: true,
-
-    credentials: true,
-
+    credentials: false,
     methods: [
         "GET",
         "POST",
@@ -16,16 +13,13 @@ const corsOptions = {
         "DELETE",
         "OPTIONS"
     ],
-
     allowedHeaders: [
         "Content-Type",
         "Authorization"
     ]
-};
+}));
 
-
-app.use(cors(corsOptions));
-
+app.options(/.*/, cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
